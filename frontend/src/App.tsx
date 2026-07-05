@@ -19,6 +19,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { useAuthStore } from './store/authStore';
 
 import LandingPage from './pages/LandingPage.tsx';
+import ApiKeys from './pages/ApiKeys.tsx';
 
 function App() {
   const { user } = useAuthStore();
@@ -42,6 +43,7 @@ function App() {
             <Route path="/skill-gap" element={<SkillGap />} />
             <Route path="/interview" element={<InterviewPrep />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/api-keys" element={<ApiKeys />} />
             {user?.role === 'admin' && (
               <>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />

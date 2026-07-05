@@ -12,10 +12,10 @@ export function NotificationsWidget() {
   }
 
   // Fallback to empty if api doesn't exist yet
-  const recentNotifs = notifications && notifications.length > 0 ? notifications.slice(0, 4) : [];
+  const recentNotifs = notifications && notifications.length > 0 ? notifications.slice(0, 3) : [];
 
   return (
-    <Card className="h-full flex flex-col hover:border-primary/50 transition-colors">
+    <Card className="h-full flex flex-col hover:border-primary/50 transition-colors overflow-hidden">
       <CardHeader className="pb-4 border-b border-border">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-medium">Recent Alerts</CardTitle>
@@ -30,7 +30,7 @@ export function NotificationsWidget() {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 py-4">
+      <CardContent className="flex-1 py-3 overflow-y-auto min-h-0">
         {recentNotifs.length > 0 ? (
           <ul className="space-y-4">
             {recentNotifs.map((notif: any, idx: number) => (

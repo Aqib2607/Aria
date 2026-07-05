@@ -51,7 +51,7 @@ export default function Dashboard() {
         <motion.div variants={itemVariants} className="xl:col-span-1">
           <AIActivityWidget />
         </motion.div>
-        <motion.div variants={itemVariants} className="xl:col-span-1 flex flex-col gap-6">
+        <motion.div variants={itemVariants} className="xl:col-span-1 flex flex-col gap-6 overflow-hidden min-h-0">
           <div className="flex-1 min-h-[140px]">
              <QuickActionsWidget />
           </div>

@@ -12,7 +12,7 @@ export function QuickActionsWidget() {
   ];
 
   return (
-    <Card className="h-full flex flex-col hover:border-primary/50 transition-colors">
+    <Card className="h-full flex flex-col hover:border-primary/50 transition-colors overflow-hidden">
       <CardHeader className="pb-4 border-b border-border">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
@@ -22,7 +22,7 @@ export function QuickActionsWidget() {
         </div>
       </CardHeader>
       <CardContent className="flex-1 py-4">
-        <div className="grid grid-cols-2 gap-3 h-full">
+        <div className="grid grid-cols-2 gap-3">
           {actions.map((action, idx) => (
             <motion.div
               whileHover={{ scale: 1.03 }}

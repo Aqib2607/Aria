@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-class GeminiService
+class GeminiService implements AiProviderInterface
 {
     protected string $apiKey;
     protected string $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/';
@@ -19,18 +19,21 @@ class GeminiService
 
     /**
      * Call the Gemini API with a given prompt.
-     * 
-     * @param string $prompt
+     *
+     * @param string      $prompt
+     * @param string|null $userApiKey  Optional per-user key that overrides the .env key.
      * @return array|null The parsed JSON response or null on failure.
      */
-    public function generateContent(string $prompt): ?array
+    public function generateContent(string $prompt, ?string $userApiKey = null): ?array
     {
-        if (empty($this->apiKey)) {
+        $key = $userApiKey ?: $this->apiKey;
+
+        if (empty($key)) {
             Log::error('Gemini API key is not configured.');
-            throw new Exception('AI service is currently unavailable.');
+            throw new Exception('AI service is currently unavailable. Please add your Gemini API key in the API Keys settings page.');
         }
 
-        $url = "{$this->baseUrl}{$this->model}:generateContent?key={$this->apiKey}";
+        $url = "{$this->baseUrl}{$this->model}:generateContent?key={$key}";
 
         $payload = [
             'contents' => [
@@ -41,33 +44,37 @@ class GeminiService
                 ]
             ],
             'generationConfig' => [
-                'temperature' => 0.7,
+                'temperature'      => 0.7,
                 'responseMimeType' => 'application/json',
             ]
         ];
 
         try {
-            $response = Http::timeout(30)->post($url, $payload);
+            $response = Http::timeout(30)->withoutVerifying()->post($url, $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
-                
+
                 // Extract the generated text (which should be JSON due to responseMimeType)
                 $textResponse = $data['candidates'][0]['content']['parts'][0]['text'] ?? null;
-                
+
                 if ($textResponse) {
                     return json_decode($textResponse, true);
                 }
             } else {
+                $errorData = $response->json();
+                $errorMessage = $errorData['error']['message'] ?? 'Unknown Gemini API Error';
                 Log::error('Gemini API Error', [
                     'status' => $response->status(),
-                    'body' => $response->body()
+                    'body'   => $response->body()
                 ]);
+                throw new Exception($errorMessage);
             }
         } catch (Exception $e) {
             Log::error('Gemini API Exception', ['message' => $e->getMessage()]);
+            throw $e;
         }
 
-        return null;
+        throw new Exception("Failed to parse response from Gemini.");
     }
 }

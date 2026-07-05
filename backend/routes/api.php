@@ -10,6 +10,7 @@ use App\Http\Controllers\SkillController;
 use App\Http\Controllers\LearningRoadmapController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\AiHistoryController;
+use App\Http\Controllers\UserApiKeyController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -31,6 +32,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('roadmaps', LearningRoadmapController::class);
     Route::apiResource('resources', ResourceController::class);
     Route::apiResource('ai-histories', AiHistoryController::class);
+    Route::get('api-keys', [UserApiKeyController::class, 'index']);
+    Route::post('api-keys', [UserApiKeyController::class, 'store']);
+    Route::delete('api-keys/{provider}', [UserApiKeyController::class, 'destroy']);
+    Route::post('api-keys/{provider}/active', [UserApiKeyController::class, 'setActive']);
 
     Route::get('/progress', [\App\Http\Controllers\ProgressController::class, 'index']);
     Route::post('/progress/complete-step', [\App\Http\Controllers\ProgressController::class, 'completeStep']);
