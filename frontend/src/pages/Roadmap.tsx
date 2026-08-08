@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, Circle, Sparkles, Map } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../services/api";
+import { useCareers } from "../hooks/useDashboardData";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -31,6 +32,8 @@ interface RoadmapProgress {
 export default function Roadmap() {
   const [loading, setLoading] = useState(false);
   const [progressData, setProgressData] = useState<RoadmapProgress[]>([]);
+  const { data: careers } = useCareers();
+  const currentGoal = careers && careers.length > 0 ? careers[careers.length - 1] : null;
 
   useEffect(() => {
     fetchProgress();
@@ -55,12 +58,21 @@ export default function Roadmap() {
     }
   };
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       career_title: "Full Stack Developer",
       missing_skills: "React, Node.js, TypeScript",
     },
   });
+
+  useEffect(() => {
+    if (currentGoal?.target_role) {
+      reset({
+        career_title: currentGoal.target_role,
+        missing_skills: "React, Node.js, TypeScript",
+      });
+    }
+  }, [currentGoal, reset]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -102,7 +114,7 @@ export default function Roadmap() {
               Generate AI Roadmap
             </CardTitle>
             <CardDescription>
-              Tell Gemini your target career and what skills you are missing to get a personalized roadmap.
+              Aria auto-filled your target career ({currentGoal?.target_role || "your goal"}).
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>

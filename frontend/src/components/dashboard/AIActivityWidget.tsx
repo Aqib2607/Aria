@@ -4,6 +4,7 @@ import { Button } from "../ui/Button";
 import { Skeleton } from "../ui/Skeleton";
 import { Activity, CheckCircle2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { Link } from "react-router-dom";
 
 export function AIActivityWidget() {
   const { data: aiHistories, isLoading } = useAiHistories();
@@ -34,7 +35,7 @@ export function AIActivityWidget() {
                 </div>
                 <div className="flex flex-col overflow-hidden">
                   <span className="text-sm font-semibold text-foreground capitalize truncate">
-                    {activity.feature.replace("_", " ")}
+                    {activity.feature.replace(/_/g, " ")}
                   </span>
                   <span className="text-xs text-muted-foreground mt-0.5">
                     {format(parseISO(activity.created_at), "MMM d, h:mm a")}
@@ -52,9 +53,11 @@ export function AIActivityWidget() {
       </CardContent>
       {recentActivities.length > 0 && (
         <CardFooter className="pt-2 border-t border-border mt-auto">
-          <Button variant="ghost" className="w-full text-xs text-muted-foreground hover:text-foreground">
-            View Complete History
-          </Button>
+          <Link to="/history" className="w-full">
+            <Button variant="ghost" className="w-full text-xs text-muted-foreground hover:text-foreground">
+              View Complete History
+            </Button>
+          </Link>
         </CardFooter>
       )}
     </Card>

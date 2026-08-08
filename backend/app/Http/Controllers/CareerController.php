@@ -26,8 +26,9 @@ class CareerController extends Controller
     {
         $userId = Auth::id() ?? 1;
         $data = $request->validate([
-            'target_role' => 'required|string',
-            'industry' => 'nullable|string',
+            'target_role'    => 'required|string',
+            'current_skills' => 'nullable',
+            'industry'       => 'nullable|string',
             'desired_salary' => 'nullable|numeric',
         ]);
 

@@ -11,13 +11,12 @@ use App\Http\Controllers\LearningRoadmapController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\AiHistoryController;
 use App\Http\Controllers\UserApiKeyController;
+use App\Http\Controllers\AiController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/email/verify/{id}/{hash}', function (Request $request, $id, $hash) {
-    // This route needs to exist so Laravel can generate the verification email URL.
-    // In a real SPA, it would redirect to the frontend to handle the token.
     return redirect('/dashboard?verified=1');
 })->middleware(['signed'])->name('verification.verify');
 
@@ -25,7 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     
-    // Core Models
+    // Core Resource Models
     Route::apiResource('profiles', UserProfileController::class);
     Route::apiResource('careers', CareerController::class);
     Route::apiResource('skills', SkillController::class);
@@ -42,13 +41,44 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
     Route::put('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
-    
-    // AI Endpoints
-    Route::post('/ai/recommend-career', [\App\Http\Controllers\AiController::class, 'recommendCareer']);
-    Route::post('/ai/analyze-skills', [\App\Http\Controllers\AiController::class, 'analyzeSkills']);
-    Route::post('/ai/generate-roadmap', [\App\Http\Controllers\AiController::class, 'generateRoadmap']);
-    Route::post('/ai/prep-interview', [\App\Http\Controllers\AiController::class, 'prepInterview']);
-    Route::post('/ai/generate-resources', [\App\Http\Controllers\AiController::class, 'generateResources']);
+
+    // Direct Base AI Endpoints
+    Route::post('/ai/recommend-career', [AiController::class, 'recommendCareer']);
+    Route::post('/ai/analyze-skills', [AiController::class, 'analyzeSkills']);
+    Route::post('/ai/skill-gap', [AiController::class, 'analyzeSkills']);
+    Route::post('/ai/generate-roadmap', [AiController::class, 'generateRoadmap']);
+    Route::post('/roadmaps/generate', [AiController::class, 'generateRoadmap']);
+    Route::post('/roadmaps/{id}/regenerate', [AiController::class, 'regenerateRoadmap']);
+    Route::post('/ai/prep-interview', [AiController::class, 'prepInterview']);
+    Route::post('/interviews/generate', [AiController::class, 'prepInterview']);
+    Route::post('/ai/generate-resources', [AiController::class, 'generateResources']);
+    Route::post('/resources/generate', [AiController::class, 'generateResources']);
+    Route::get('/history', [AiHistoryController::class, 'index']);
+    Route::get('/history/{id}', [AiHistoryController::class, 'show']);
+    Route::delete('/history/{id}', [AiHistoryController::class, 'destroy']);
+
+    // Documented Versioned API Group (/api/v1/...)
+    Route::prefix('v1')->group(function () {
+        Route::post('/ai/recommend-career', [AiController::class, 'recommendCareer']);
+        Route::post('/ai/skill-gap', [AiController::class, 'analyzeSkills']);
+        Route::post('/roadmaps/generate', [AiController::class, 'generateRoadmap']);
+        Route::post('/roadmaps/{id}/regenerate', [AiController::class, 'regenerateRoadmap']);
+        Route::post('/interviews/generate', [AiController::class, 'prepInterview']);
+        Route::post('/resources/generate', [AiController::class, 'generateResources']);
+        Route::get('/history', [AiHistoryController::class, 'index']);
+        Route::get('/history/{id}', [AiHistoryController::class, 'show']);
+        Route::delete('/history/{id}', [AiHistoryController::class, 'destroy']);
+
+        Route::get('/profile', [UserProfileController::class, 'index']);
+        Route::put('/profile', [UserProfileController::class, 'store']);
+        Route::get('/careers', [CareerController::class, 'index']);
+        Route::post('/careers', [CareerController::class, 'store']);
+        Route::get('/skills', [SkillController::class, 'index']);
+        Route::post('/skills', [SkillController::class, 'store']);
+        Route::get('/roadmaps', [LearningRoadmapController::class, 'index']);
+        Route::get('/roadmaps/{id}', [LearningRoadmapController::class, 'show']);
+        Route::delete('/roadmaps/{id}', [LearningRoadmapController::class, 'destroy']);
+    });
 });
 
 Route::middleware(['auth:sanctum', 'is_admin'])->prefix('admin')->group(function () {

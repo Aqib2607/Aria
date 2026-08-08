@@ -10,6 +10,8 @@ import {
   Settings,
   Briefcase,
   KeyRound,
+  History,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuthStore } from "../../store/authStore";
@@ -21,6 +23,8 @@ const navigation = [
   { name: "Skill Gap", href: "/skill-gap", icon: Target },
   { name: "Interview Prep", href: "/interview", icon: MessageSquare },
   { name: "Resources", href: "/resources", icon: Library },
+  { name: "AI History", href: "/history", icon: History },
+  { name: "AI Verification", href: "/ai-verification", icon: Sparkles },
 ];
 
 const bottomNavigation = [

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
 import { Library, BookOpen, ExternalLink, GraduationCap } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../services/api";
+import { useCareers } from "../hooks/useDashboardData";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
@@ -27,12 +28,22 @@ interface ResourcesResponse {
 export default function Resources() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ResourcesResponse | null>(null);
+  const { data: careers } = useCareers();
+  const currentGoal = careers && careers.length > 0 ? careers[careers.length - 1] : null;
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       career_title: "Full Stack Developer",
     },
   });
+
+  useEffect(() => {
+    if (currentGoal?.target_role) {
+      reset({
+        career_title: currentGoal.target_role,
+      });
+    }
+  }, [currentGoal, reset]);
 
   const onSubmit = async (formData: any) => {
     try {

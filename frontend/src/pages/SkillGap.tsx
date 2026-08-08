@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { motion, AnimatePresence } from "framer-motion";
-import { Target, Search, AlertCircle, Lightbulb } from "lucide-react";
+import { Target, Search, AlertCircle, Lightbulb, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../services/api";
+import { useCareers } from "../hooks/useDashboardData";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Label } from "../components/ui/Label";
 import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 import { ThinkingIndicator } from "../components/ui/ThinkingIndicator";
 
 interface SkillGapResponse {
@@ -19,20 +21,31 @@ interface SkillGapResponse {
 export default function SkillGap() {
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<SkillGapResponse | null>(null);
+  const { data: careers } = useCareers();
+  const currentGoal = careers && careers.length > 0 ? careers[careers.length - 1] : null;
 
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       career_title: "Full Stack Developer",
-      current_skills: "HTML, CSS, basic JavaScript",
+      current_skills: "HTML, CSS, JavaScript",
     },
   });
+
+  useEffect(() => {
+    if (currentGoal) {
+      reset({
+        career_title: currentGoal.target_role || "Full Stack Developer",
+        current_skills: currentGoal.current_skills_string || (Array.isArray(currentGoal.current_skills) ? currentGoal.current_skills.join(", ") : ""),
+      });
+    }
+  }, [currentGoal, reset]);
 
   const onSubmit = async (data: any) => {
     try {
       setLoading(true);
       const payload = {
         career_title: data.career_title,
-        current_skills: data.current_skills.split(",").map((s: string) => s.trim()),
+        current_skills: data.current_skills.split(",").map((s: string) => s.trim()).filter(Boolean),
       };
 
       const response = await api.post("/ai/analyze-skills", payload);
@@ -67,7 +80,7 @@ export default function SkillGap() {
               Analyze Skills
             </CardTitle>
             <CardDescription>
-              Provide your target career and current skills to get AI-powered recommendations.
+              Aria auto-filled your target career and saved skills from your Career Goals.
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -82,6 +95,20 @@ export default function SkillGap() {
                   <Input id="current_skills" {...register("current_skills")} className="bg-background" />
                 </div>
               </div>
+
+              {currentGoal && currentGoal.current_skills && currentGoal.current_skills.length > 0 && (
+                <div className="pt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                  <span>Using saved skills from your profile:</span>
+                  <div className="flex flex-wrap gap-1">
+                    {currentGoal.current_skills.map((s: string, idx: number) => (
+                      <Badge key={idx} variant="outline" className="text-[10px] py-0 px-1.5 bg-background">
+                        {s}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
             <CardFooter className="flex justify-end pt-2">
               <Button type="submit" isLoading={loading}>

@@ -21,6 +21,16 @@ export const useCareers = () => {
   });
 };
 
+export const useUserSkills = () => {
+  return useQuery({
+    queryKey: ["user-skills"],
+    queryFn: async () => {
+      const res = await api.get("/skills");
+      return res.data.data || [];
+    },
+  });
+};
+
 export const useProgress = () => {
   return useQuery({
     queryKey: ["progress"],

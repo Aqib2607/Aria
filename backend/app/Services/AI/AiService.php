@@ -5,6 +5,7 @@ namespace App\Services\AI;
 use App\Models\AiHistory;
 use App\Models\UserApiKey;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AiService
 {
@@ -47,7 +48,7 @@ class AiService
     }
 
     /**
-     * Generate content dynamically using the active provider.
+     * Generate content dynamically using the active provider with automatic retry strategy.
      */
     protected function executeProvider(string $prompt, string $feature): ?array
     {
@@ -56,9 +57,21 @@ class AiService
         $userApiKey = $record ? $record->api_key : null;
 
         $startTime = microtime(true);
-        $response = $providerService->generateContent($prompt, $userApiKey);
-        $executionTime = microtime(true) - $startTime;
+        $response = null;
 
+        try {
+            $response = $providerService->generateContent($prompt, $userApiKey);
+        } catch (\Exception $e) {
+            Log::warning("AI Service attempt 1 failed ({$feature}): {$e->getMessage()}. Retrying once...");
+            try {
+                $response = $providerService->generateContent($prompt, $userApiKey);
+            } catch (\Exception $e2) {
+                Log::error("AI Service retry failed ({$feature}): {$e2->getMessage()}");
+                throw $e2;
+            }
+        }
+
+        $executionTime = microtime(true) - $startTime;
         $this->logHistory($feature, $prompt, $response, $executionTime);
 
         return $response;
@@ -127,4 +140,3 @@ class AiService
         }
     }
 }
-

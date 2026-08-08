@@ -20,6 +20,8 @@ import { useAuthStore } from './store/authStore';
 
 import LandingPage from './pages/LandingPage.tsx';
 import ApiKeys from './pages/ApiKeys.tsx';
+import AiHistoryPage from './pages/AiHistoryPage.tsx';
+import AiVerification from './pages/AiVerification.tsx';
 
 function App() {
   const { user } = useAuthStore();
@@ -43,6 +45,8 @@ function App() {
             <Route path="/skill-gap" element={<SkillGap />} />
             <Route path="/interview" element={<InterviewPrep />} />
             <Route path="/resources" element={<Resources />} />
+            <Route path="/history" element={<AiHistoryPage />} />
+            <Route path="/ai-verification" element={<AiVerification />} />
             <Route path="/api-keys" element={<ApiKeys />} />
             {user?.role === 'admin' && (
               <>

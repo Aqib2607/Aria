@@ -4,14 +4,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
+import { Target } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import api from "../services/api";
 import { useAuthStore } from "../store/authStore";
+import { useCareers } from "../hooks/useDashboardData";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/Card";
 import { Input } from "../components/ui/Input";
 import { Label } from "../components/ui/Label";
 import { Button } from "../components/ui/Button";
+import { Badge } from "../components/ui/Badge";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -23,6 +27,10 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export default function Profile() {
   const { user, setAuth, token } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const { data: careers } = useCareers();
+
+  const currentGoal = careers && careers.length > 0 ? careers[careers.length - 1] : null;
+  const userSkills: string[] = currentGoal?.current_skills || [];
 
   const {
     register,
@@ -62,7 +70,7 @@ export default function Profile() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile Settings</h1>
         <p className="text-muted-foreground mt-1">
-          Manage your account settings and preferences.
+          Manage your account settings, career goals, and skills.
         </p>
       </div>
 
@@ -90,6 +98,62 @@ export default function Profile() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Career Goal & Registered Skills Summary */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  Career Goal & Registered Skills
+                </CardTitle>
+                <CardDescription>
+                  Saved in database for your profile.
+                </CardDescription>
+              </div>
+              <Link to="/careers">
+                <Button variant="outline" size="sm" className="gap-1 text-xs bg-background">
+                  Edit Goal & Skills
+                </Button>
+              </Link>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Target Role
+              </p>
+              <div>
+                {currentGoal?.target_role ? (
+                  <Badge variant="default" className="text-sm py-1 px-3 font-semibold">
+                    🎯 {currentGoal.target_role}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground italic text-sm">No target role set yet.</span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+                Registered Skills ({userSkills.length})
+              </p>
+              {userSkills.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
+                  {userSkills.map((skill: string, idx: number) => (
+                    <Badge key={idx} variant="secondary" className="text-xs py-1 px-2.5">
+                      {skill}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No skills registered yet.</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Personal Information</CardTitle>

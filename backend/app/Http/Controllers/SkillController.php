@@ -3,46 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\UserSkill;
+use Illuminate\Support\Facades\Auth;
 
 class SkillController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the user's skills.
      */
     public function index()
     {
-        //
-    }
+        $userId = Auth::id() ?? 1;
+        $skills = UserSkill::where('user_id', $userId)
+            ->join('skills', 'user_skills.skill_id', '=', 'skills.id')
+            ->select('skills.id', 'skills.name', 'skills.description', 'skills.level', 'user_skills.proficiency_level')
+            ->get();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['data' => $skills]);
     }
 }
